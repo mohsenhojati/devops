@@ -1,0 +1,25 @@
+# on server side
+apt install nfs-kernel-server -y # install NFS
+cat /proc/fs/nfsd/versions     # show version
+mkdir /srv/nfs4
+cd /srv/nfs4/
+mkdir sharedir
+vi /etc/exports
+#add two lines below on exports
+/srv/nfs4        192.168.10.0/24(rw,sync,fsid=0,crossmnt,no_subtree_check,no_root_squash)   
+/srv/nfs4/sharedir   192.168.10.10(rw,sync,no_subtree_check,no_root_squash) 192.168.10.11(rw,sync,no_subtree_check,no_root_squash) 192.168.10.12(ro,sync,no_subtree_check,no_root_squash)
+#192.168.10.X ips that can see share folder
+:wq!
+exportfs -arv
+exportfs -v
+####192.168.10.10 is ip of NFS server
+
+# on client side
+apt install nfs-common -y
+mkdir /mnt/sharedir
+mount -t nfs -o vers=4 192.168.10.10:/sharedir /mnt/sharedir/
+df -Th
+192.168.10.10:/sharedir         nfs4    96G   12G   80G  14% /mnt/sharedir
+vi /etc/fstab
+192.168.10.10:/sharedir /mnt/sharedir    nfs     defaults,timeo=900,retrans=5,_netdev    0       0
+:wq!
